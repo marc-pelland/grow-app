@@ -54,8 +54,6 @@ unsigned long lastMillis = 0;
 time_t now;
 time_t nowish = 1510592825;
 
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-
 void NTPConnect(void)
 {
   Serial.print("Setting time using SNTP");
@@ -72,54 +70,6 @@ void NTPConnect(void)
   gmtime_r(&now, &timeinfo);
   Serial.print("Current time: ");
   Serial.print(asctime(&timeinfo));
-}
-
-// Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
-void theaterChaseRainbow(int wait) {
-  Serial.println("rainbow chase");
-  int firstPixelHue = 0;     // First pixel starts at red (hue 0)
-  for (int a = 0; a < 30; a++) { // Repeat 30 times...
-    for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
-      strip.clear();         //   Set all pixels in RAM to 0 (off)
-      // 'c' counts up from 'b' to end of strip in increments of 3...
-      for (int c = b; c < strip.numPixels(); c += 3) {
-        // hue of pixel 'c' is offset by an amount to make one full
-        // revolution of the color wheel (range 65536) along the length
-        // of the strip (strip.numPixels() steps):
-        int      hue   = firstPixelHue + c * 65536L / strip.numPixels();
-        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
-        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
-      }
-      strip.show();                // Update strip with new contents
-      delay(wait);                 // Pause for a moment
-      firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
-    }
-  }
-}
-
-void setPixels(int val) {
-  theaterChaseRainbow(RAINBOW_SPEED); // White, half brightness
-  strip.clear();
-
-  uint32_t color = strip.Color(0, 255, 0);
-  if (val <= MIN_VALUE) {
-    // red
-    color = strip.Color(255, 0, 0);
-  } else if (val <= MID_VALUE) {
-    // yellow
-    color = strip.Color(255, 255, 0);
-  }
-  
-  for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
-    if (i >= val) {
-      strip.setPixelColor(i, strip.Color(0, 0, 0));       //  Set pixel's color (in RAM)
-    } else {
-      strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-    }
-
-    strip.show();                          //  Update strip to match
-    delay(30);                           //  Pause for a moment
-  }
 }
 
 void messageReceived(String &topic, String &payload)
@@ -140,7 +90,7 @@ void messageReceived(String &topic, String &payload)
     // const char* projectId = doc["projectId"];
     int val = doc["value"];
 
-    setPixels(val);
+    // setPixels(val);
   }
 }
 
